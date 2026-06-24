@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 1: Specs Are Types</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<div class="lesson-header">
+  <div class="lesson-number">Lesson 1 of ?</div>
+  <h1 class="lesson-title">Specs Are Types</h1>
+  <p class="lesson-subtitle">The simplest specification in Lean is the type of a function.</p>
+</div>
+
+<div class="mission-box">
+  <h3>🔗 Mission Connection</h3>
+  <p>Your goal: <em>"Write specifications in Lean so LLMs generate code that provably conforms."</em><br>
+  Before you can write complex specs, you need to understand the <strong>fundamental unit of specification in Lean: the type</strong>.</p>
+  <p>A function's <strong>type signature</strong> <code>(input types → output type)</code> <em>is</em> a specification. It says: "Given inputs of these shapes, I produce output of this shape." The Lean compiler checks every implementation against its type — automatically, always, without fail.</p>
+  <p><strong>This is your spec checker.</strong></p>
+</div>
+
+<h2>1. What is Lean?</h2>
+
+<p>Lean is two things fused into one:</p>
+<ul>
+  <li><strong>A functional programming language</strong> — like Python, but with a much more powerful type system</li>
+  <li><strong>A proof assistant</strong> — it can <em>prove</em> that programs satisfy their specifications</li>
+</ul>
+
+<p>For your mission, the key feature is this:</p>
+
+<blockquote class="info">
+  <strong>Lean's compiler checks every program against its specification automatically.</strong><br>
+  If a function claims to return a <code>Nat</code> (natural number) but tries to return a <code>String</code>, the compiler <em>refuses to build</em>. No runtime errors. No type mismatches escaping to production.
+</blockquote>
+
+<p>This is very different from Python. In Python, you can write:</p>
+<pre><code>def add(x, y):
+    return x + y  # Is it numbers? Strings? Lists? Who knows!</code></pre>
+
+<p>Python doesn't check. The bug surfaces at runtime — possibly in production. In Lean, you write:</p>
+<pre><code>def add (x : Nat) (y : Nat) : Nat :=
+  x + y</code></pre>
+
+<p>The <code>: Nat</code> after each argument and after the <code>)</code> are <strong>type annotations</strong>. They say: "I expect two Nats and promise to return a Nat." Lean's <strong>type checker</strong> verifies this contract at compile time.</p>
+
+<h2>2. Your First Lean Commands</h2>
+
+<p>Open the existing file <code>Kata/Basic.lean</code> — you already have a working function there. Let's use two diagnostic commands to inspect it:</p>
+
+<h3><code>#eval</code> — run any expression</h3>
+<p>Like typing into a Python REPL. Add this line at the bottom of <code>Kata/Basic.lean</code>:</p>
+<pre><code>#eval hello "World"</code></pre>
+<p>Then build and run from your terminal:</p>
+<pre><code>docker exec lean_ci lake build Kata</code></pre>
+<p>You won't see output yet — <code>#eval</code> is only visible when you run an interactive session or the file through <code>lean</code> directly. (We'll use tests to see results.)</p>
+
+<h3><code>#check</code> — inspect any type</h3>
+<p>This is <strong>your most important tool</strong>. Add to <code>Kata/Basic.lean</code>:</p>
+<pre><code>#check hello</code></pre>
+<p>This will tell you the type of <code>hello</code>:</p>
+<pre><code>hello : String → String</code></pre>
+<p>Read this as: "<code>hello</code> is a function from <code>String</code> to <code>String</code>."</p>
+
+<div class="concept">
+  <h3>💡 Key Insight: Read Types as Specifications</h3>
+  <p>The type <code>String → String</code> is a <strong>specification</strong>. It says:<br>
+  <em>"Given any <code>String</code>, this function produces a <code>String</code>."</em><br>
+  Lean guarantees every call to <code>hello</code> returns a <code>String</code> — no exceptions, no <code>None</code>, no surprises.</p>
+</div>
+
+<h2>3. Functions are Pure (No Hidden Surprises)</h2>
+
+<p>In Lean, functions are <strong>pure</strong>. This means:</p>
+<ul>
+  <li>Same input → same output, every time (no mutable state)</li>
+  <li>No side effects (no printing, no file I/O, no database writes)</li>
+  <li>No <code>null</code> or <code>None</code> sneak attacks</li>
+  <li>No exceptions thrown</li>
+</ul>
+
+<p>Why does this matter for specifications?</p>
+
+<blockquote class="info">
+  <strong>A pure function's type is a complete specification of its behavior.</strong><br>
+  If a function is pure and type-checks, what you see (the type) is what you get (the behavior). There are no hidden effects, no implicit state, no runtime crashes.
+</blockquote>
+
+<h2>4. Basic Types</h2>
+
+<p>Here are the types you'll use most often:</p>
+
+<table>
+  <tr><th>Type</th><th>Meaning</th><th>Examples</th><th>Python equivalent</th></tr>
+  <tr><td><code>Nat</code></td><td>Natural numbers (0, 1, 2, …)</td><td><code>0</code>, <code>42</code>, <code>1000</code></td><td><code>int</code> (but unbounded)</td></tr>
+  <tr><td><code>Int</code></td><td>Integers (…, -2, -1, 0, 1, …)</td><td><code>-5</code>, <code>0</code>, <code>7</code></td><td><code>int</code></td></tr>
+  <tr><td><code>String</code></td><td>Text</td><td><code>"hello"</code>, <code>s!"Hi, {name}"</code></td><td><code>str</code></td></tr>
+  <tr><td><code>Bool</code></td><td>Boolean (note: lowercase)</td><td><code>true</code>, <code>false</code></td><td><code>bool</code> (case: <code>True</code>/<code>False</code>)</td></tr>
+</table>
+
+<div class="concept">
+  <h3>⚠️ Python-to-Lean Traps</h3>
+  <ul>
+    <li><code>true</code>/<code>false</code> are <strong>lowercase</strong> in Lean (Python uses <code>True</code>/<code>False</code>)</li>
+    <li>No <code>None</code> or <code>null</code> — every variable always has a valid value</li>
+    <li>No <code>if</code> as a statement — <code>if</code> is an <em>expression</em> that returns a value</li>
+    <li>Function arguments are separated by spaces, not commas: <code>add x y</code>, not <code>add(x, y)</code></li>
+  </ul>
+</div>
+
+<h2>5. Your First Exercise: Write a Function from a Spec</h2>
+
+<p>Here's the workflow you'll use throughout these lessons:</p>
+<ol>
+  <li>I give you a <strong>specification</strong> (a type signature)</li>
+  <li>You write the <strong>implementation</strong> in <code>Kata/Basic.lean</code></li>
+  <li>You <strong>run the tests</strong> to see if Lean agrees your code meets the spec</li>
+</ol>
+
+<div class="exercise">
+  <h3>✏️ Exercise 1.1: <code>double</code></h3>
+  <p><strong>Specification:</strong></p>
+  <pre><code>def double (n : Nat) : Nat :=
+  -- your code here</code></pre>
+  <p><strong>What it should do:</strong> Return <code>n + n</code> for any natural number <code>n</code>.</p>
+  <p><strong>Add this function</strong> to <code>Kata/Basic.lean</code> (after the <code>hello</code> function).</p>
+  <p><strong>Run the tests:</strong></p>
+  <pre><code>docker exec lean_ci make tests</code></pre>
+  <p>The tests will print something like:</p>
+  <pre><code>double:
+  ✓ returns 0 when given 0
+  ✓ returns 10 when given 5</code></pre>
+  <p>If you see <strong>all ✓</strong>, your code matches the spec. If you see <strong>✗</strong>, fix and try again.</p>
+  <details>
+    <summary>Solution (try yourself first!)</summary>
+    <pre><code>def double (n : Nat) : Nat :=
+  n + n</code></pre>
+  </details>
+</div>
+
+<div class="exercise">
+  <h3>✏️ Exercise 1.2: <code>isPositive</code></h3>
+  <p><strong>Specification:</strong></p>
+  <pre><code>def isPositive (n : Nat) : Bool :=
+  -- your code here</code></pre>
+  <p><strong>What it should do:</strong> Return <code>true</code> if <code>n</code> is greater than 0, and <code>false</code> if <code>n</code> equals 0.</p>
+  <p><strong>Hint:</strong> Use <code>if n > 0 then true else false</code> or a <code>match</code> expression.</p>
+  <p><strong>Run the tests:</strong> Same command as above. Tests for this function are already in the test file.</p>
+  <details>
+    <summary>Solution (try yourself first!)</summary>
+    <pre><code>def isPositive (n : Nat) : Bool :=
+  if n > 0 then true else false</code></pre>
+    <p>Or with pattern matching:</p>
+    <pre><code>def isPositive : Nat → Bool
+  | 0 => false
+  | _ => true</code></pre>
+  </details>
+</div>
+
+<h2>6. What Happens When You Break the Spec?</h2>
+
+<p>Lean's type checker is strict. Try writing this in <code>Kata/Basic.lean</code>:</p>
+<pre><code>def broken (n : Nat) : String :=
+  n + 5  -- type error!</code></pre>
+
+<p>When you run <code>lake build</code>, you'll get:</p>
+<pre><code>type mismatch
+  n + 5
+has type
+  Nat
+but expected
+  String</code></pre>
+
+<p>Lean is saying: <em>"You promised me a <code>String</code> but gave me a <code>Nat</code>. That violates the specification."</em></p>
+
+<blockquote class="success">
+  <strong>This is the core of your mission.</strong> Once you write a specification as a Lean type:
+  <ul>
+    <li>An LLM can generate implementation code</li>
+    <li>Lean's compiler checks the implementation against your spec</li>
+    <li>If it compiles <strong>it conforms</strong> — no ambiguity, no drift, no runtime surprises</li>
+  </ul>
+</blockquote>
+
+<h2>7. Run the Full Test Suite</h2>
+
+<p>Let's see the existing tests pass, and your new functions also pass:</p>
+<pre><code>docker exec lean_ci make tests</code></pre>
+
+<p>Expected output:</p>
+<pre><code>hello
+  hello:
+    ✓ returns 'Hello, World!' when given 'World'
+double
+  double:
+    ✓ returns 0 when given 0
+    ✓ returns 10 when given 5
+isPositive
+  isPositive:
+    ✓ returns false when given 0
+    ✓ returns true when given 5</code></pre>
+
+<p>All green? Congratulations! You've written your first Lean specifications.</p>
+
+<h2>What You Learned</h2>
+<ul>
+  <li>Lean is a programming language + proof assistant with a strict type checker</li>
+  <li>A function's <strong>type signature is a specification</strong></li>
+  <li><code>#check</code> shows you the type (specification) of any expression</li>
+  <li>Lean functions are pure — their type tells you everything they do</li>
+  <li>Basic types: <code>Nat</code>, <code>Int</code>, <code>String</code>, <code>Bool</code></li>
+  <li>The type checker catches specification violations at compile time</li>
+</ul>
+
+<h2>Reference</h2>
+<ul>
+  <li><a href="../reference/glossary.html">Glossary of Lean Terms</a> — bookmark this</li>
+  <li><a href="https://lean-lang.org/functional_programming_in_lean/">Functional Programming in Lean</a> — Chapter 1 (intro) and Chapter 2 (basic types)</li>
+</ul>
+
+<h2>Follow-up Questions</h2>
+<p>Ask me anything that was unclear. Some questions you might have:</p>
+<ul>
+  <li>"How is <code>match</code> different from <code>if/else</code>?"</li>
+  <li>"Why are functions pure? What's wrong with side effects?"</li>
+  <li>"How do I write a function that takes two arguments or more?"</li>
+  <li>"Can I define my own types / specifications?"</li>
+</ul>
+
+<hr>
+<p><em>Lesson 1 of the <a href="../MISSION.md">Lean for Spec-Driven AI Development</a> mission.</em></p>
+
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lean Glossary — Quick Reference</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+  dl dt {
+    font-weight: 600;
+    margin-top: 1.2rem;
+    font-size: 1.05rem;
+    color: #0f0f1a;
+  }
+  dl dd {
+    margin-left: 0;
+    margin-top: 0.3rem;
+    color: #333;
+  }
+  dl dd + dt { margin-top: 1.8rem; }
+  .term-meta {
+    font-size: 0.8rem;
+    color: #777;
+    font-weight: 400;
+  }
+  .see-also { font-size: 0.85rem; color: #0f3460; margin-top: 0.2rem; }
+</style>
+</head>
+<body>
+
+<h1>Lean Glossary</h1>
+<p>A quick-reference glossary of Lean and type-theory terms used across these lessons.</p>
+
+<dl>
+
+<dt>Type <span class="term-meta">(noun)</span></dt>
+<dd>
+  A classification of data that tells Lean what kind of value something is. Examples: <code>Nat</code> (natural numbers), <code>String</code>, <code>Bool</code>. In Lean, <strong>every expression has a type</strong>, and the compiler checks that types are used consistently.
+  <div class="see-also">See also: <a href="../lessons/0001-specs-are-types.html">Lesson 1: Specs Are Types</a></div>
+</dd>
+
+<dt>Type Checker <span class="term-meta">(noun)</span></dt>
+<dd>
+  The part of Lean that verifies every expression has the correct type before the program runs. <strong>This is your specification checker</strong> — if a function claims to return a <code>Nat</code> but actually returns a <code>String</code>, the type checker catches it.
+</dd>
+
+<dt>Specification <span class="term-meta">(noun)</span></dt>
+<dd>
+  A precise description of what a program should do. In Lean, the <strong>type signature of a function is its specification</strong>. For example, <code>add : Nat → Nat → Nat</code> specifies "a function that takes two Nats and returns a Nat." More expressive specifications use dependent types and theorems.
+  <div class="see-also">See also: <a href="../lessons/0001-specs-are-types.html">Lesson 1: Specs Are Types</a></div>
+</dd>
+
+<dt>Function <span class="term-meta">(noun)</span></dt>
+<dd>
+  A mapping from inputs to outputs. In Lean, functions are <strong>pure</strong> — they always return the same output for the same input, and have no side effects. Defined with <code>def</code>.
+  <div class="see-also">See also: <a href="../lessons/0001-specs-are-types.html">Lesson 1: Specs Are Types</a></div>
+</dd>
+
+<dt><code>def</code> <span class="term-meta">(keyword)</span></dt>
+<dd>
+  Used to define a function or constant in Lean. Syntax: <code>def name (args : Type) : ReturnType := body</code>. Example: <code>def double (x : Nat) : Nat := x + x</code>.
+</dd>
+
+<dt><code>#eval</code> <span class="term-meta">(command)</span></dt>
+<dd>
+  Evaluates a Lean expression and prints the result. Like Python's <code>print()</code> or the REPL. Example: <code>#eval 2 + 2</code> prints <code>4</code>.
+</dd>
+
+<dt><code>#check</code> <span class="term-meta">(command)</span></dt>
+<dd>
+  Shows the type of any expression. Example: <code>#check "hello"</code> prints <code>"hello" : String</code>. Your most important debugging tool for understanding types.
+</dd>
+
+<dt><code>Nat</code> <span class="term-meta">(type)</span></dt>
+<dd>
+  The type of natural numbers: 0, 1, 2, 3, … Unlike Python ints, these are <strong>unbounded</strong> (no overflow). They are defined recursively: zero and successor.
+</dd>
+
+<dt><code>String</code> <span class="term-meta">(type)</span></dt>
+<dd>
+  The type of text strings. Written in double quotes: <code>"hello"</code>. String interpolation: <code>s!"Hello, {name}!"</code>.
+</dd>
+
+<dt><code>Bool</code> <span class="term-meta">(type)</span></dt>
+<dd>
+  The type of boolean values: <code>true</code> and <code>false</code>. Note: lowercase in Lean (unlike Python's <code>True</code>/<code>False</code>).
+</dd>
+
+<dt>Pattern Matching <span class="term-meta">(noun)</span></dt>
+<dd>
+  A way to define a function by cases. Instead of <code>if/else</code>, you list the possible shapes of the input and what to return for each. Example:
+  <pre><code>def isZero (n : Nat) : Bool :=
+  match n with
+  | 0 => true
+  | _ => false</code></pre>
+</dd>
+
+<dt>Pure <span class="term-meta">(adjective)</span></dt>
+<dd>
+  Describes a function that has no side effects — it only computes its return value from its arguments. No mutable state, no I/O, no exceptions. Pure functions are predictable and testable.
+</dd>
+
+<dt>Proposition as Types <span class="term-meta">(concept)</span></dt>
+<dd>
+  The core idea of the Curry-Howard correspondence: a proposition (a statement that could be true or false) is represented as a type, and a proof of that proposition is a value of that type. This is how Lean unifies programming and proving.
+  <div class="see-also">Covered in later lessons.</div>
+</dd>
+
+<dt>Curry-Howard Correspondence <span class="term-meta">(concept)</span></dt>
+<dd>
+  The deep idea that <strong>programs and proofs are the same thing</strong>:
+  <ul>
+    <li>Types ↔ Propositions (specifications)</li>
+    <li>Programs ↔ Proofs (evidence that the spec is met)</li>
+    <li>Function application ↔ Modus ponens</li>
+  </ul>
+  <div class="see-also">Covered in later lessons.</div>
+</dd>
+
+<dt>Dependent Type <span class="term-meta">(noun)</span></dt>
+<dd>
+  A type that depends on a <em>value</em>. For example, <code>Vec T n</code> could be the type of vectors of length <code>n</code> containing elements of type <code>T</code>. This lets you encode properties like "this list has exactly 3 elements" in the type itself.
+</dd>
+
+<dt>Lake <span class="term-meta">(noun)</span></dt>
+<dd>
+  Lean's build system and package manager. Like Python's <code>pip</code> + <code>make</code>. Commands: <code>lake build</code>, <code>lake new</code>, <code>lake run</code>.
+</dd>
+
+<dt>Elan <span class="term-meta">(noun)</span></dt>
+<dd>
+  The toolchain manager for Lean (like <code>rustup</code> for Rust or <code>pyenv</code> for Python). Installs and switches between Lean versions.
+</dd>
+
+<dt>LSpec</dt>
+<dd>
+  A testing library for Lean used in this workspace's katas. Similar to Python's <code>pytest</code>. Assertions like <code>LSpec.test "name" (actual = expected)</code>.
+</dd>
+
+<dt>Kernel <span class="term-meta">(noun)</span></dt>
+<dd>
+  The small, trusted core of Lean that checks proofs. Everything else — tactics, automation, the elaborator — can have bugs, but the kernel is minimal and verified. It's the final authority on correctness.
+</dd>
+
+</dl>
+
+<hr>
+<p><em>Last updated: June 2026. Part of the <a href="../MISSION.md">Lean for Spec-Driven AI Development</a> mission.</em></p>
+
+</body>
+</html>
