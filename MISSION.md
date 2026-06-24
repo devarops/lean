@@ -2,14 +2,9 @@
 
 ## Why
 
-I want to build an AI harness where LLM agents generate code that provably conforms to my specifications. My experience writing specs in plain English failed — LLMs produce confident, plausible, wrong implementations due to ambiguity and "AI drift." I need a language of precise, machine-checkable specifications that an LLM can target and a compiler can verify.
+I want to learn Lean so I can run, study, change and improve [qed](https://github.com/tskovlund/qed) to meet my AI harness needs. My experience writing specs in plain English failed — LLMs produce confident, plausible, wrong implementations due to ambiguity and "AI drift." I need a language of precise, machine-checkable specifications that an LLM can target and a compiler can verify.
 
-When I finish this, I will have a pipeline that looks like:
-
-1. I write a specification in Lean (types, theorems, properties)
-2. An LLM agent generates implementation code targeting that spec
-3. Lean's compiler checks the implementation against the spec automatically
-4. If it compiles, the code conforms — no ambiguity, no drift
+When I finish this, I will be able to run, study, change and improve qed to meet my AI harness needs.
 
 ## Success looks like
 
