@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 2: Executable Specs — Lean as the Oracle</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<div class="lesson-header">
+  <div class="lesson-number">Lesson 2 of ?</div>
+  <h1 class="lesson-title">Executable Specs — Lean as the Oracle</h1>
+  <p class="lesson-subtitle"><em>Your Lean functions don't just describe what correct looks like — they compute it.</em></p>
+</div>
+
+<div class="mission-box">
+  <h3>🔗 Mission Connection</h3>
+  <p>Your mission: <em>"Write specifications in Lean so LLMs generate code that provably conforms."</em></p>
+  <p>In <a href="0001-specs-are-types.html">Lesson 1</a>, you learned that a function's <strong>type signature is a specification</strong>. Now level up: the function <em>body</em> is a specification too — it's an <strong>executable oracle</strong> that computes the exact correct output for any input.</p>
+  <p><strong>This is the key insight for your AI pipeline:</strong> You don't just describe what correct looks like in Lean — you <em>compute</em> it. Then you compare the LLM's output against Lean's computed answer. No ambiguity.</p>
+</div>
+
+<h2>1. Recap: Your Functions Are Already Specs</h2>
+
+<p>In Lesson 1, you wrote two functions:</p>
+
+<pre><code>def double (n : Nat) : Nat := n + n
+
+def isPositive (n : Nat) : Bool := n > 0</code></pre>
+
+<p>We said the <strong>type signature</strong> was the spec: <code>Nat → Nat</code> means "takes a Nat, returns a Nat." But the <em>body</em> is also a specification — it defines <strong>what the correct output is</strong> for every possible input.</p>
+
+<div class="concept">
+  <h3>💡 Key Insight: Executable Specifications</h3>
+  <p>A specification can be <strong>executable</strong> — you can run it and get the expected answer. This is called an <strong>oracle</strong>: a reference implementation that always produces the correct output.</p>
+  <p>In your AI pipeline, the Lean oracle computes what the LLM's code <em>should</em> produce. Then you compare:</p>
+  <pre><code>Lean oracle output  ==  LLM implementation output</code></pre>
+  <p>If they match for enough test cases, the LLM's code is correct.</p>
+</div>
+
+<h2>2. From Tests to Oracles</h2>
+
+<p>Look at your existing test for <code>double</code>:</p>
+
+<pre><code>LSpec.test "returns 10 when given 5" (double 5 = 10)</code></pre>
+
+<p>This test contains the oracle value directly: <strong>10</strong>. But where did 10 come from? <em>You</em> computed it in your head: <code>5 + 5 = 10</code>.</p>
+
+<p>Now imagine you're testing against a spec that's too complex to compute in your head — say, "validate this JSON response against a 20-field schema with business rules." You'd rather <strong>let the computer compute the expected answer</strong>.</p>
+
+<p>That's what <code>double</code> itself does:</p>
+
+<pre><code>#eval double 5   -- Lean prints: 10</code></pre>
+
+<p><strong>Your function is the oracle.</strong> Instead of hard-coding expected values in tests, you can write:</p>
+
+<pre><code>LSpec.test "matches oracle for 5" (double 5 = double 5)  -- trivial
+LSpec.test "some impl matches oracle for 5" (myImpl 5 = double 5)  -- meaningful!</code></pre>
+
+<p>The second form is powerful: <code>double 5</code> computes the expected answer automatically, no matter what <code>n</code> is.</p>
+
+<h2>3. The Oracle Pattern</h2>
+
+<p>Here's the pattern for spec-driven AI development:</p>
+
+<pre><code>-- Step 1: Write the specification as an oracle function
+def doubleSpec (n : Nat) : Nat :=
+  n + n
+
+-- Step 2: Compute expected outputs for test inputs
+#eval doubleSpec 0    -- 0
+#eval doubleSpec 5    -- 10
+#eval doubleSpec 42   -- 84
+
+-- Step 3: Write a validator that tests any implementation against the oracle
+def validateDouble (impl : Nat → Nat) : Bool :=
+  impl 0 = doubleSpec 0 &&
+  impl 1 = doubleSpec 1 &&
+  impl 5 = doubleSpec 5 &&
+  impl 42 = doubleSpec 42
+
+-- Step 4: Test the validator itself
+#eval validateDouble doubleSpec           -- true  (oracle matches itself)
+#eval validateDouble (fun n => 0)         -- false (wrong implementation)
+</code></pre>
+
+<div class="exercise">
+  <h3>✏️ Try This in Your REPL</h3>
+  <p>You don't need to add this to <code>Kata/Basic.lean</code> — just follow along mentally. But if you want to, add a <code>#eval</code> line to your kata file and run:</p>
+  <pre><code>docker exec lean_ci make tests</code></pre>
+  <p>Look at the output. Lean computes <code>doubleSpec 42</code> and prints <code>84</code>. That's your oracle at work.</p>
+</div>
+
+<div class="concept">
+  <h3>🔬 Why This Matters for AI</h3>
+  <p>An LLM can generate code in <strong>any language</strong> — Python, JavaScript, Go, Rust. Lean doesn't care. You write the oracle in Lean, the LLM generates the implementation in Python, and you check:</p>
+  <pre><code># In Python, after running the LLM-generated function:
+assert my_double(5) == 10  # where 10 came from Lean's oracle
+
+# Or better: dump test cases from Lean, run them in Python
+# test_cases.json: [{"input": 5, "expected": 10}, ...]</code></pre>
+  <p>This is how <a href="https://github.com/tskovlund/qed">Qed</a> works: Lean computes the oracle, the LLM generates code, and a test harness checks the match.</p>
+</div>
+
+<h2>4. Your New Exercise: <code>max</code></h2>
+
+<p>Time to apply the oracle pattern to a new problem. Open <code>Kata/Basic.lean</code> and find the <strong>Lesson 2 exercises</strong> section (already added for you).</p>
+
+<p>You'll write three things:</p>
+
+<ol>
+  <li><strong><code>maxSpec</code></strong> — the oracle. A function that returns the larger of two natural numbers.</li>
+  <li><strong><code>maxImpl</code></strong> — an implementation that should match the spec.</li>
+  <li><strong><code>validateMax</code></strong> — a validator that checks any implementation against <code>maxSpec</code>.</li>
+</ol>
+
+<div class="exercise">
+  <h3>✏️ Exercise 2.1: Write the Oracle — <code>maxSpec</code></h3>
+  <p><strong>Specification:</strong></p>
+  <pre><code>def maxSpec (a b : Nat) : Nat :=
+  -- your code here</code></pre>
+  <p><strong>What it should do:</strong> Return whichever of <code>a</code> or <code>b</code> is larger. If they're equal, return that value.</p>
+  <p><strong>Examples:</strong></p>
+  <ul>
+    <li><code>maxSpec 0 0</code> → <code>0</code></li>
+    <li><code>maxSpec 0 5</code> → <code>5</code></li>
+    <li><code>maxSpec 5 0</code> → <code>5</code></li>
+    <li><code>maxSpec 3 7</code> → <code>7</code></li>
+    <li><code>maxSpec 42 42</code> → <code>42</code></li>
+  </ul>
+  <p><strong>Hint:</strong> Use an <code>if</code> expression. In Lean, <code>if a >= b then a else b</code> is valid (it's an expression, not a statement).</p>
+  <p><strong>Run the tests:</strong></p>
+  <pre><code>docker exec lean_ci make tests</code></pre>
+  <details>
+    <summary>Solution (try yourself first!)</summary>
+    <pre><code>def maxSpec (a b : Nat) : Nat :=
+  if a >= b then a else b</code></pre>
+  </details>
+</div>
+
+<div class="exercise">
+  <h3>✏️ Exercise 2.2: Write the Implementation — <code>maxImpl</code></h3>
+  <p><strong>Specification:</strong> Same behavior as <code>maxSpec</code> — return the larger of <code>a</code> and <code>b</code>.</p>
+  <pre><code>def maxImpl (a b : Nat) : Nat :=
+  -- your code here</code></pre>
+  <p><strong>Note:</strong> This simulates what an LLM would generate. You can write the same logic as <code>maxSpec</code>, or a different approach (pattern matching, nested <code>if</code>, etc.). The tests check that <code>maxImpl</code> matches <code>maxSpec</code> for all test cases — exactly how your AI pipeline will work.</p>
+  <details>
+    <summary>Solution (try yourself first!)</summary>
+    <pre><code>def maxImpl (a b : Nat) : Nat :=
+  if a > b then a else b</code></pre>
+    <p>Note: <code>a >= b</code> vs <code>a > b</code> — both work because if <code>a = b</code>, either branch returns <code>a = b</code>, which is the same value. But <code>a >= b</code> is more efficient (one comparison instead of two).</p>
+  </details>
+</div>
+
+<div class="exercise">
+  <h3>✏️ Exercise 2.3: Write the Validator — <code>validateMax</code></h3>
+  <p><strong>Specification:</strong></p>
+  <pre><code>def validateMax (impl : Nat → Nat → Nat) : Bool :=
+  -- your code here</code></pre>
+  <p><strong>What it should do:</strong> Test <code>impl</code> against <code>maxSpec</code> for at least 5 representative inputs. Return <code>true</code> only if all tests pass.</p>
+  <p><strong>It should:</strong></p>
+  <ul>
+    <li>Return <code>true</code> when given a correct implementation (like <code>maxSpec</code> itself)</li>
+    <li>Return <code>false</code> when given a wrong implementation (like <code>fun _ _ => 0</code>)</li>
+  </ul>
+  <p><strong>Hint:</strong> Use <code>&&</code> (logical AND) to chain multiple checks:</p>
+  <pre><code>impl 0 0 = maxSpec 0 0 && impl 0 5 = maxSpec 0 5 && ...</code></pre>
+  <details>
+    <summary>Solution (try yourself first!)</summary>
+    <pre><code>def validateMax (impl : Nat → Nat → Nat) : Bool :=
+  impl 0 0 = maxSpec 0 0 &&
+  impl 0 5 = maxSpec 0 5 &&
+  impl 5 0 = maxSpec 5 0 &&
+  impl 3 7 = maxSpec 3 7 &&
+  impl 7 3 = maxSpec 7 3</code></pre>
+    <p>This covers: equal inputs (0,0), first larger (5,0), second larger (0,5 and 3,7), reversed (7,3). A wrong implementation like <code>fun _ _ => 0</code> will fail on any case where the answer isn't 0.</p>
+  </details>
+</div>
+
+<h2>5. Run the Full Test Suite</h2>
+
+<p>Once you've completed all three exercises, run:</p>
+
+<pre><code>docker exec lean_ci make tests</code></pre>
+
+<p>Expected output should include:</p>
+
+<pre><code>maxSpec:
+  ✓ 0 max 0 = 0
+  ✓ 0 max 5 = 5
+  ✓ 5 max 0 = 5
+  ✓ 3 max 7 = 7
+  ✓ 7 max 3 = 7
+  ✓ 42 max 42 = 42
+
+maxImpl:
+  ✓ matches spec for (0,0)
+  ✓ matches spec for (0,5)
+  ✓ matches spec for (5,0)
+  ✓ matches spec for (3,7)
+  ✓ matches spec for (7,3)
+  ✓ matches spec for (42,42)
+
+validateMax:
+  ✓ accepts correct implementation
+  ✓ rejects wrong implementation</code></pre>
+
+<p>If all 14 new tests pass <strong>plus</strong> the 5 old tests from Lesson 1 = 19 total ✓, you're done!</p>
+
+<h2>6. What the Validator Catches</h2>
+
+<p>Let's see what happens when the validator catches a bug. Imagine an LLM generates this implementation:</p>
+
+<pre><code>def buggyMax (a b : Nat) : Nat := a  -- always returns a</code></pre>
+
+<p>Your validator would catch it:</p>
+
+<pre><code>validateMax buggyMax
+-- Checks:
+--   buggyMax 0 0 = maxSpec 0 0  → 0 = 0  ✓
+--   buggyMax 0 5 = maxSpec 0 5  → 0 = 5  ✗  --> returns false</code></pre>
+
+<p>Lean tells you: <strong>this implementation does not match the spec</strong>. No ambiguity. No "looks about right." The oracle is the final authority.</p>
+
+<div class="concept">
+  <h3>💡 The Full Pipeline Vision</h3>
+  <p>You now have all the pieces for the core AI development loop:</p>
+  <ol>
+    <li><strong>You write:</strong> an oracle function in Lean (the spec)</li>
+    <li><strong>LLM writes:</strong> an implementation in Python (or Lean, or any language)</li>
+    <li><strong>You check:</strong> validate the implementation against the oracle using representative test inputs</li>
+    <li><strong>If it fails:</strong> the LLM tries again (or you give it the failing test case as feedback)</li>
+    <li><strong>If it passes:</strong> the implementation is verified correct for all tested inputs</li>
+  </ol>
+  <p>In later lessons, we'll cover how to prove correctness for <strong>all</strong> inputs (not just the ones you test). But for most practical AI development, testing against a representative oracle is already a huge win.</p>
+</div>
+
+<h2>7. Optional: <code>#eval</code> Your Oracle Values</h2>
+
+<p>Add these lines to your <code>Kata/Basic.lean</code> if you want to see the oracle in action:</p>
+
+<pre><code>-- Oracle values for max
+#eval maxSpec 3 7   -- should print 7
+#eval maxSpec 7 3   -- should print 7
+#eval maxSpec 0 5   -- should print 5
+</code></pre>
+
+<p>These <code>#eval</code> lines are optional — the tests don't check them. But they're a great way to explore: "What does my oracle say for this input?" before you even think about the implementation.</p>
+
+<h2>What You Learned</h2>
+<ul>
+  <li>Your Lean functions are <strong>executable specifications</strong> (oracles)</li>
+  <li>An oracle computes the expected output for any input — no manual computation needed</li>
+  <li>The <strong>oracle pattern</strong>: write a spec function, use <code>#eval</code> to compute expected values, write a validator to check implementations</li>
+  <li>A <strong>validator</strong> is a function that takes an implementation and returns <code>true</code>/<code>false</code> based on whether it matches the oracle</li>
+  <li>You applied this pattern: <code>maxSpec</code> (oracle) → <code>maxImpl</code> (implementation) → <code>validateMax</code> (validator)</li>
+  <li>Oracles work across languages — Lean computes, Python executes, comparison reveals correctness</li>
+</ul>
+
+<h2>New Glossary Terms</h2>
+<ul>
+  <li><a href="../reference/glossary.html#oracle"><strong>Oracle</strong></a> — an executable reference implementation that always produces the correct output</li>
+  <li><a href="../reference/glossary.html#validator"><strong>Validator</strong></a> — a function that checks an implementation against an oracle for selected test cases</li>
+</ul>
+
+<h2>Reference</h2>
+<ul>
+  <li><a href="../reference/glossary.html">Glossary of Lean Terms</a></li>
+  <li><a href="https://lean-lang.org/functional_programming_in_lean/">Functional Programming in Lean</a> — Chapter 1 (intro) and Chapter 2 (basic types, if expressions)</li>
+  <li><a href="https://github.com/tskovlund/qed">Qed</a> — the reference implementation of spec-driven LLM development with Lean</li>
+</ul>
+
+<h2>Follow-up Questions</h2>
+<p>Ask me anything that was unclear. Some questions you might have:</p>
+<ul>
+  <li>"How many test cases should a validator have?"</li>
+  <li>"What if I can't write an oracle because the spec is too hard to compute?"</li>
+  <li>"How do I connect Lean oracles to Python tests in practice?"</li>
+  <li>"Can I write a validator that works for <em>any</em> function, not just a specific one?"</li>
+</ul>
+
+<hr>
+<p><em>Lesson 2 of the <a href="../MISSION.md">Lean for Spec-Driven AI Development</a> mission.</em></p>
+
+</body>
+</html>

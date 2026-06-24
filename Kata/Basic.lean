@@ -15,3 +15,21 @@ def double (n : Nat) : Nat :=
 -- Specification: isPositive n returns true if n > 0, false otherwise
 def isPositive (n : Nat) : Bool :=
   n > 0
+
+-- === Lesson 2: Specs as Oracles ===
+
+-- Exercise 2.1: Oracle — returns the larger of a and b
+-- TODO: replace `a` with the correct implementation
+def maxSpec (a b : Nat) : Nat :=
+  a
+
+-- Exercise 2.2: Implementation — should match maxSpec
+-- TODO: fix this to match maxSpec
+def maxImpl (a b : Nat) : Nat :=
+  a
+
+-- Exercise 2.3: Validator — checks any impl against maxSpec
+-- Use at least 5 representative test cases
+-- TODO: replace `false` with a proper validator
+def validateMax (impl : Nat → Nat → Nat) : Bool :=
+  false

@@ -71,6 +71,18 @@
   Shows the type of any expression. Example: <code>#check "hello"</code> prints <code>"hello" : String</code>. Your most important debugging tool for understanding types.
 </dd>
 
+<dt id="oracle">Oracle <span class="term-meta">(noun)</span></dt>
+<dd>
+  An executable reference implementation that always produces the correct output. In spec-driven AI development, you write the oracle in Lean, and the LLM generates code that should match it. Example: <code>doubleSpec</code> is an oracle for the "double a number" task.
+  <div class="see-also">See also: <a href="../lessons/0002-executable-specs.html">Lesson 2: Executable Specs</a></div>
+</dd>
+
+<dt id="validator">Validator <span class="term-meta">(noun)</span></dt>
+<dd>
+  A function that checks whether an implementation matches an oracle for selected test cases. Returns <code>true</code> if the implementation passes all checks, <code>false</code> otherwise. Example: a validator might test an LLM's <code>max</code> implementation against <code>maxSpec</code> for 5 representative inputs.
+  <div class="see-also">See also: <a href="../lessons/0002-executable-specs.html">Lesson 2: Executable Specs</a></div>
+</dd>
+
 <dt><code>Nat</code> <span class="term-meta">(type)</span></dt>
 <dd>
   The type of natural numbers: 0, 1, 2, 3, … Unlike Python ints, these are <strong>unbounded</strong> (no overflow). They are defined recursively: zero and successor.
