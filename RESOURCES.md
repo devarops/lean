@@ -40,6 +40,10 @@
   Another search engine for Lean definitions and theorems.
 - [Lean Zulip Chat Archive](https://leanprover-community.github.io/archive/)
   Community discussion archive. **Use for**: finding answers to specific problems.
+- [Qed: Typed Spec-Driven Development — tskovlund/qed](https://github.com/tskovlund/qed)
+  Tool that implements the worker loop pattern: spec in Lean, LLM implements, Lean kernel verifies, loop repeats on failure. 70+ formal proofs of the loop's own correctness. **Use for**: reference implementation of your exact mission pipeline, inspiration for your own AI harness.
+- [Software Verification in Lean 2026 Workshop (SVIL 2026)](https://beneficial-ai-foundation.github.io/SVIL2026)
+  One-day workshop at INRIA Paris on formal software verification with Lean 4. Talks by Leo de Moura (Lean's creator) on scalable verification, Son Ho on co-developing code and proofs for SymCrypt, and Derek Sorensen on correct and computable specifications. **Use for**: understanding the state of the art in Lean software verification.
 
 ## Wisdom (Communities)
 
@@ -54,3 +58,8 @@
 
 - No dedicated beginner-friendly resource found that specifically connects Lean formal specification to LLM-driven development — this is exactly what this workspace will produce.
 - Limited resources on "Lean as a specification language for Web APIs" — most Lean verification examples focus on algorithms or mathematics, not application-level software.
+
+## Recently Filled
+
+- Added Qed tool (tskovlund/qed) — a complete reference implementation of the spec-driven LLM development pipeline with Lean verification.
+- Added SVIL 2026 workshop — state-of-the-art research on Lean for software verification.
