@@ -11,7 +11,7 @@ all: check tests
 	tests
 
 check:
-	lake build
+	lake build test_kata
 
 clean:
 	rm --force --recursive .lake/build
@@ -40,4 +40,4 @@ refactor: check
 	chmod g+w -R .
 
 tests:
-	lake build && .lake/build/bin/test_kata
+	lake build test_kata && .lake/build/bin/test_kata

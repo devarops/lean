@@ -1,10 +1,9 @@
-import Kata
-open Kata
+import Kata.Basic
+import LSpec
 
-open LSpec
+def tests : LSpec.TestSeq :=
+  LSpec.describe "hello" $
+    LSpec.test "returns 'Hello, World!' when given 'World'" (hello "World" = "Hello, World!")
 
-describe "hello" do
-  it "returns 'Hello, World!' when given 'World'" do
-    expect (hello "World") = "Hello, World!"
-
-def main := lspecMain
+def main (args : List String) : IO UInt32 :=
+  LSpec.lspecIO (.ofList [("hello", [tests])]) args

@@ -1,13 +1,13 @@
 import Lake
-open Lake
+open Lake DSL
 
-package kata
+package kata where
 
 require LSpec from git
-  "https://github.com/lakesif/LSpec.git"
+  "https://github.com/argumentcomputer/LSpec.git"
 
 @[default_target]
-lean_lib Kata
+lean_lib Kata where
 
 lean_exe test_kata where
-  root := `Tests.test
+  root := `tests.test
