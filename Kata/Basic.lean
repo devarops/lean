@@ -37,3 +37,13 @@ def validateMax (impl : Nat → Nat → Nat) : Bool :=
 
 -- === Lesson 3: The First Theorem ===
 -- (Add your theorems here)
+theorem double_eq_add_self (n : Nat) : double n = n + n :=
+  rfl
+
+#check double_eq_add_self
+
+
+theorem hello_greets (name : String) : hello name = s!"Hello, {name}!" :=
+  rfl
+
+#check hello_greets
