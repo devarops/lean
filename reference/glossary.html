@@ -149,7 +149,34 @@
   A testing library for Lean used in this workspace's katas. Similar to Python's <code>pytest</code>. Assertions like <code>LSpec.test "name" (actual = expected)</code>.
 </dd>
 
-<dt>Kernel <span class="term-meta">(noun)</span></dt>
+<dt id="theorem">Theorem <span class="term-meta">(noun)</span></dt>
+<dd>
+  A proposition whose truth is checked by Lean's kernel. Defined with the <code>theorem</code> keyword — same syntax as <code>def</code>, but the body is a <strong>proof</strong> instead of a computation. Example:
+  <pre><code>theorem double_eq_add_self (n : Nat) : double n = n + n := rfl</code></pre>
+  Read as: "For every <code>n</code>, <code>double n</code> equals <code>n + n</code>."
+  <div class="see-also">See also: <a href="../lessons/0003-from-testing-to-proving.html">Lesson 3: From Testing to Proving</a></div>
+</dd>
+
+<dt id="rfl"><code>rfl</code> <span class="term-meta">(proof term)</span></dt>
+<dd>
+  Short for <strong>reflexivity</strong>. The simplest possible proof: it asserts that two sides of an equality are <strong>definitionally equal</strong> — they reduce to the same expression when the compiler unfolds all definitions. Works only when the equality is "true by definition." Example: <code>theorem foo (n : Nat) : n + 0 = n := rfl</code> fails <em>because <code>n + 0</code> does not reduce to <code>n</code> for variable <code>n</code>.</em>
+  <div class="see-also">See also: <a href="../lessons/0003-from-testing-to-proving.html">Lesson 3: From Testing to Proving</a></div>
+</dd>
+
+<dt id="universal-quantifier"><code>∀</code> (Universal Quantifier) <span class="term-meta">(symbol)</span></dt>
+<dd>
+  Pronounced <strong>"for all"</strong> or <strong>"for every."</strong> A binder in a proposition that says the statement holds for every value of the given type. In practice, you see it in the type of a theorem:
+  <pre><code>double_eq_add_self (n : Nat) : double n = n + n</code></pre>
+  The <code>(n : Nat)</code> binder is syntactic sugar for <code>∀ (n : Nat), ...</code>. The proposition is: "for every natural number <code>n</code>, <code>double n</code> equals <code>n + n</code>."
+  <div class="see-also">See also: <a href="../lessons/0003-from-testing-to-proving.html">Lesson 3: From Testing to Proving</a></div>
+</dd>
+
+<dt id="definitional-equality">Definitional Equality <span class="term-meta">(concept)</span></dt>
+<dd>
+  Two expressions are <strong>definitionally equal</strong> when the compiler can tell they're the same just by unfolding definitions and computing basic reductions — no reasoning required. This is what <code>rfl</code> proves. Example: <code>double n</code> and <code>n + n</code> are definitionally equal because <code>double</code> is defined as <code>n + n</code>. Contrast with <strong>propositional equality</strong>, which requires a proof.
+</dd>
+
+<dt id="kernel">Kernel <span class="term-meta">(noun)</span></dt>
 <dd>
   The small, trusted core of Lean that checks proofs. Everything else — tactics, automation, the elaborator — can have bugs, but the kernel is minimal and verified. It's the final authority on correctness.
 </dd>
@@ -157,7 +184,7 @@
 </dl>
 
 <hr>
-<p><em>Last updated: June 2026. Part of the <a href="../MISSION.md">Lean for Spec-Driven AI Development</a> mission.</em></p>
+<p><em>Last updated: June 2026 (Lesson 3: theorem, rfl, ∀, definitional equality). Part of the <a href="../MISSION.md">Lean for Spec-Driven AI Development</a> mission.</em></p>
 
 </body>
 </html>

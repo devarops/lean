@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 3: From Testing to Proving — The First Theorem</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<div class="lesson-header">
+  <div class="lesson-number">Lesson 3 of ?</div>
+  <h1 class="lesson-title">From Testing to Proving — The First Theorem</h1>
+  <p class="lesson-subtitle"><em>Your validator tests a handful of inputs. A theorem tests every single one.</em></p>
+</div>
+
+<div class="mission-box">
+  <h3>🔗 Mission Connection</h3>
+  <p>Your mission: <em>"I can read and understand basic Lean proofs, and write simple ones myself."</em></p>
+  <p>This is the moment Lean does something Python literally cannot. You already know how to <strong>test</strong> specific cases (Lesson 2). Now learn how to <strong>prove</strong> a property for <strong>every possible input</strong> — and have the compiler check it.</p>
+  <p>qed has 70+ proofs of its own correctness. This lesson is the smallest possible step toward reading them.</p>
+</div>
+
+<h2>1. The Limit of Testing</h2>
+
+<p>Your <code>validateMax</code> function checks <code>maxImpl</code> against <code>maxSpec</code> for 5 specific inputs:</p>
+
+<pre><code>-- (0,0), (1,2), (2,1), (5,5), (10,3)</code></pre>
+
+<p>What if there's a 6th input pair where <code>maxImpl</code> is wrong? Your validator won't catch it. You'd need to add that case too. And the 7th. And the 8th.</p>
+
+<p>This is the fundamental limitation of testing: <strong>you can only check finitely many inputs.</strong> Python stops here.</p>
+
+<p>Lean takes the next step: you can write a <strong>theorem</strong> that is quantified over <strong>all</strong> inputs (infinitely many), and the compiler verifies the proof. No gaps.</p>
+
+<h2>2. The <code>theorem</code> Keyword</h2>
+
+<p>A <code>theorem</code> looks just like a <code>def</code> — but instead of returning a value, it states a proposition and gives a proof:</p>
+
+<table>
+  <tr><th><code>def</code></th><th><code>theorem</code></th></tr>
+  <tr><td>Defines a <strong>function</strong></td><td>States a <strong>proposition</strong></td></tr>
+  <tr><td>Body is a <strong>computation</strong></td><td>Body is a <strong>proof</strong></td></tr>
+  <tr><td><code>#eval</code> runs it</td><td><code>#check</code> shows the proposition</td></tr>
+</table>
+
+<p>Here's the simplest possible theorem in Lean, using <code>double</code> from Lesson 1:</p>
+
+<div style="background: #f7f0fa; border: 1px solid #d5c5e0; border-radius: 8px; padding: 1rem 1.2rem; margin: 1.5rem 0;">
+<h3 style="margin-top: 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6b478b;">💡 The Theorem</h3>
+<pre><code>theorem double_eq_add_self (n : Nat) : double n = n + n :=
+  rfl</code></pre>
+</div>
+
+<p>Read this aloud: <em>"For every natural number <code>n</code>, <code>double n</code> equals <code>n + n</code>."</em></p>
+
+<p>The proof is <code>rfl</code> — short for <strong>reflexivity</strong>. It says: <em>"These two sides are the same by definition."</em></p>
+
+<p><code>double</code> is defined as <code>n + n</code>. So <code>double n</code> and <code>n + n</code> are literally the same expression. The proof is trivial because the compiler can see they're identical.</p>
+
+<h2>3. Testing vs. Proving — See the Difference</h2>
+
+<p>Testing says: <em>"I checked 5 inputs."</em><br>
+Proving says: <em>"I checked <strong>all</strong> inputs."</em></p>
+
+<p>Let's compare side by side:</p>
+
+<pre><code>-- TESTING: checks specific values (FINITE)
+#eval double 0      -- 0
+#eval double 5      -- 10
+#eval double 42     -- 84
+-- What about double 1000? You'd need another #eval.
+
+-- PROVING: checks ALL values (INFINITE)
+theorem double_eq_add_self (n : Nat) : double n = n + n := rfl
+-- This single theorem covers EVERY Nat: 0, 1, 2, ... , ∞
+-- The compiler verified it once. Never needs re-checking.</code></pre>
+
+<div class="concept">
+  <h3>🔬 This Is Where Lean > Python</h3>
+  <p>Python can test <code>double(5) == 10</code> — one input.<br>
+  Python <strong>cannot</strong> assert <code>double(n) == n + n</code> for <strong>every</strong> <code>n</code> and have the compiler verify it.<br>
+  Python has no <code>theorem</code> keyword. It has no proof checker.</p>
+  <p>Lean does. This is the smallest possible step into the territory Python cannot follow.</p>
+</div>
+
+<h2>4. Try It: Add the Theorem</h2>
+
+<p>Open <code>Kata/Basic.lean</code> and add these lines at the very end:</p>
+
+<pre><code>-- === Lesson 3: The First Theorem ===
+
+theorem double_eq_add_self (n : Nat) : double n = n + n :=
+  rfl</code></pre>
+
+<p>Then run:</p>
+
+<pre><code>docker exec lean_ci lake build Kata</code></pre>
+
+<p>If it builds without errors, Lean's kernel has accepted your first proof. Congratulations — you're now writing verified specifications.</p>
+
+<h2>5. What <code>#check</code> Shows You</h2>
+
+<p>Add this line after the theorem:</p>
+
+<pre><code>#check double_eq_add_self</code></pre>
+
+<p>It will print:</p>
+
+<pre><code>double_eq_add_self (n : Nat) : double n = n + n</code></pre>
+
+<p>This is the <strong>type</strong> of the theorem — which is also the <strong>proposition</strong> it proves. In Lean, a theorem's type IS the proposition it states. A proof is a value of that type. This is the Curry-Howard correspondence at work.</p>
+
+<div class="exercise">
+  <h3>✏️ Exercise 3.1: Prove the Same for <code>hello</code></h3>
+  <p>Below your <code>double_eq_add_self</code> theorem, add a second theorem:</p>
+  <pre><code>theorem hello_greets (name : String) : hello name = s!"Hello, {name}!" :=
+  rfl</code></pre>
+  <p><strong>Before you add it</strong>, predict what <code>#check hello_greets</code> will print.</p>
+  <p><strong>Then add it</strong> and run <code>lake build</code> to confirm.</p>
+  <p><strong>Then run <code>make tests</code></strong> to confirm all existing tests still pass.</p>
+  <details>
+    <summary>Answer</summary>
+    <p><code>#check hello_greets</code> prints something like:</p>
+    <pre><code>hello_greets (name : String) : hello name = toString "Hello, " ++ toString name ++ toString "!"</code></pre>
+    <p>The proposition is <em>"for every <code>name</code>, <code>hello name</code> equals the interpolated greeting."</em> The proof is <code>rfl</code> because <code>hello name</code> <strong>is</strong> defined as <code>s!"Hello, {name}!"</code> — Lean elaborates string interpolation into concatenation, but both sides are still definitionally the same.</p>
+  </details>
+</div>
+
+<h2>6. What Happens When You Try <code>rfl</code> Too Early?</h2>
+
+<p><code>rfl</code> only works when both sides are <strong>definitionally equal</strong> — the compiler can tell they're the same just by unfolding definitions.</p>
+
+<p>Try this (you don't need to add it permanently):</p>
+
+<pre><code>-- THIS DOES NOT COMPILE:
+theorem maxSpec_self (a : Nat) : maxSpec a a = a :=
+  rfl</code></pre>
+
+<p>This fails because <code>maxSpec a a</code> expands to <code>if a > a then a else a</code>. Whether the result equals <code>a</code> depends on whether <code>a > a</code> is false — which is true, but it's a <strong>fact that needs proving</strong>. The compiler can't just see it by unfolding definitions. You need a deeper proof, which you'll learn soon.</p>
+
+<blockquote class="info">
+  <strong>Key distinction:</strong>
+  <ul>
+    <li><code>rfl</code> works when both sides are <strong>syntactically the same after computation</strong></li>
+    <li>When the equality is true but requires reasoning (like <code>a > a</code> being false), you need a <strong>tactic proof</strong> — coming in the next lesson</li>
+  </ul>
+</blockquote>
+
+<h2>What You Learned</h2>
+<ul>
+  <li><strong>Testing</strong> checks finitely many inputs — always incomplete</li>
+  <li><strong>Proving</strong> checks infinitely many inputs — complete, verified by the kernel</li>
+  <li><code>theorem</code> states a proposition; the body is a proof</li>
+  <li><code>rfl</code> proves equalities that are true <strong>by definition</strong></li>
+  <li>A theorem's <strong>type</strong> <em>is</em> the proposition it proves</li>
+  <li>Python cannot do this — this is the smallest place where Lean wins</li>
+</ul>
+
+<h2>New Glossary Terms</h2>
+<ul>
+  <li><a href="../reference/glossary.html#theorem"><strong>Theorem</strong></a> — a proposition whose truth is checked by the kernel</li>
+  <li><a href="../reference/glossary.html#rfl"><strong>rfl</strong></a> — reflexivity, the simplest proof: "same by definition"</li>
+  <li><a href="../reference/glossary.html#universal-quantifier"><strong>∀ (forall)</strong></a> — "for every" — universal quantification over all values</li>
+</ul>
+
+<h2>Reference</h2>
+<ul>
+  <li><a href="../reference/glossary.html">Glossary of Lean Terms</a></li>
+  <li><a href="https://lean-lang.org/theorem_proving_in_lean4/">Theorem Proving in Lean 4</a> — Chapter 2 (Basics): <code>rfl</code>, <code>theorem</code>, simple proofs</li>
+  <li><a href="0002-executable-specs.html">Lesson 2: Executable Specs</a> — the testing foundation you just leveled up from</li>
+</ul>
+
+<h2>Follow-up Questions</h2>
+<p>Ask me anything. Some questions you might have:</p>
+<ul>
+  <li>"What counts as 'same by definition' for <code>rfl</code>?"</li>
+  <li>"How do I prove something when <code>rfl</code> isn't enough?"</li>
+  <li>"Can I prove something about <code>maxSpec</code>?"</li>
+  <li>"How does the kernel check a proof?"</li>
+</ul>
+
+<hr>
+<p><em>Lesson 3 of the <a href="../MISSION.md">Lean for Spec-Driven AI Development</a> mission.</em></p>
+
+</body>
+</html>

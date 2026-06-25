@@ -26,3 +26,7 @@
 - Learning records: `./learning-records/0001-*.md`
 - Code katas: `Kata/Basic.lean` and `tests/test.lean`
 - Build/test: `docker exec lean_ci make tests`
+
+## Discovered Traps
+- Bool vs Prop: `n > 0` elaborates differently in `def` vs `theorem` contexts. In `def n > 0` is `Bool`; in `theorem`, `n > 0` is `Prop` (Nat.gt). This causes `rfl` to fail for theorems about Bool-valued functions. Use `decide` or avoid Bool-in-Prop confusion.
+- `s!"Hello, {name}!"` elaborates to string concatenation (`toString "Hello, " ++ toString name ++ toString "!"`) — still definitionally equal to the `hello` definition though.

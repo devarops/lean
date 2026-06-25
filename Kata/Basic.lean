@@ -34,3 +34,6 @@ def maxImpl (a b : Nat) : Nat :=
 def validateMax (impl : Nat → Nat → Nat) : Bool :=
   let testCases : List (Nat × Nat) := [(0, 0), (1, 2), (2, 1), (5, 5), (10, 3)]
   testCases.all (fun (a, b) => impl a b == maxSpec a b)
+
+-- === Lesson 3: The First Theorem ===
+-- (Add your theorems here)
