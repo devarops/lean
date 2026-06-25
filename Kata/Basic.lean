@@ -21,15 +21,16 @@ def isPositive (n : Nat) : Bool :=
 -- Exercise 2.1: Oracle — returns the larger of a and b
 -- TODO: replace `a` with the correct implementation
 def maxSpec (a b : Nat) : Nat :=
-  a
+  if a > b then a else b
 
 -- Exercise 2.2: Implementation — should match maxSpec
 -- TODO: fix this to match maxSpec
 def maxImpl (a b : Nat) : Nat :=
-  a
+  if b > a then b else a
 
 -- Exercise 2.3: Validator — checks any impl against maxSpec
 -- Use at least 5 representative test cases
 -- TODO: replace `false` with a proper validator
 def validateMax (impl : Nat → Nat → Nat) : Bool :=
-  false
+  let testCases : List (Nat × Nat) := [(0, 0), (1, 2), (2, 1), (5, 5), (10, 3)]
+  testCases.all (fun (a, b) => impl a b == maxSpec a b)
