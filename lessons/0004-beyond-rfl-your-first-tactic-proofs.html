@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 4: Beyond rfl — Your First Tactic Proofs</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+
+<div class="lesson-header">
+  <div class="lesson-number">Lesson 4 of ?</div>
+  <h1 class="lesson-title">Beyond rfl — Your First Tactic Proofs</h1>
+  <p class="lesson-subtitle"><em><code>rfl</code> works when both sides are the same by definition. Tactic proofs handle everything else.</em></p>
+</div>
+
+<div class="mission-box">
+  <h3>🔗 Mission Connection</h3>
+  <p>Your mission: prove theorems in set theory and logic. The first theorem you'll learn to prove today — <code>P ∧ Q → Q ∧ P</code> — is a propositional tautology. The tactics you'll learn (<code>intro</code>, <code>cases</code>, <code>simp</code>, <code>apply</code>) are the same ones you'll use for every set identity, De Morgan's law, and relation property that follows.</p>
+  <p><strong>This lesson is the bridge from "rfl works" to "I can prove things that require reasoning."</strong></p>
+</div>
+
+<h2>1. The Limit of rfl</h2>
+
+<p>In Lesson 3, you proved two theorems with <code>rfl</code>:</p>
+
+<pre><code>theorem double_eq_add_self (n : Nat) : double n = n + n := rfl
+
+theorem hello_greets (name : String) : hello name = s!"Hello, {name}!" := rfl</code></pre>
+
+<p>These work because <code>double n</code> <em>is</em> defined as <code>n + n</code>, and <code>hello name</code> <em>is</code> defined as <code>s!"Hello, {name}!"</code>. The compiler sees they are syntactically the same after unfolding definitions.</p>
+
+<p>But look at this — you already saw it fail in Lesson 3:</p>
+
+<pre><code>theorem maxSpec_self (a : Nat) : maxSpec a a = a := rfl
+-- FAILS! Not definitionally equal.</code></pre>
+
+<p><code>maxSpec a a</code> expands to <code>if a &gt; a then a else a</code>. Whether that equals <code>a</code> depends on whether <code>a &gt; a</code> is false — a <em>fact that requires reasoning</em>, not just definition unfolding.</p>
+
+<p><strong>rfl is for definitional equality. Tactic proofs are for propositional equality.</strong> Most interesting theorems are the second kind.</p>
+
+<h2>2. The <code>by</code> Block — Entering Tactic Mode</h2>
+
+<p>Instead of giving a proof term directly (<code>rfl</code>), you can write <code>by</code> followed by a block of <strong>tactics</strong> — commands that tell Lean how to transform the goal step by step:</p>
+
+<pre><code>theorem add_zero (n : Nat) : n + 0 = n := by
+  simp</code></pre>
+
+<p>Read this as: <em>"To prove <code>n + 0 = n</code>, use the <code>simp</code> tactic (which knows about arithmetic identities)."</em></p>
+
+<p>When you write <code>by</code>, Lean enters <strong>tactic mode</strong>. The goal is the proposition after the colon. Each tactic modifies the goal until it's proved.</p>
+
+<div class="concept">
+  <h3>💡 Key Insight: Tactic Mode</h3>
+  <p>A <code>by</code> block contains a script of tactics. Lean runs the script and checks that the final result is a valid proof. Think of it like a recipe: "first do this, then do that, and at the end the goal should be closed."</p>
+  <p>Tactics are what make Lean a <em>proof assistant</em> — you guide the proof step by step, and Lean checks each step.</p>
+</div>
+
+<h2>3. Your First Tactic: <code>simp</code></h2>
+
+<p>The <code>simp</code> tactic tries to <strong>simplify</strong> the goal using a database of known rewrite rules. It's the Swiss Army knife of Lean tactics.</p>
+
+<pre><code>theorem add_zero (n : Nat) : n + 0 = n := by
+  simp</code></pre>
+
+<p><code>simp</code> knows that <code>n + 0</code> simplifies to <code>n</code> for natural numbers. It closes the goal automatically.</p>
+
+<p>Let's prove a second one:</p>
+
+<pre><code>theorem zero_add (n : Nat) : 0 + n = n := by
+  simp</code></pre>
+
+<div class="exercise">
+  <h3>✏️ Exercise 4.1: Try <code>simp</code></h3>
+  <p>Open <code>Kata/Basic.lean</code> and add these two theorems at the very end:</p>
+  <pre><code>-- === Lesson 4: Tactic Proofs ===
+
+theorem add_zero (n : Nat) : n + 0 = n := by
+  simp
+
+theorem zero_add (n : Nat) : 0 + n = n := by
+  simp</code></pre>
+  <p>Then run:</p>
+  <pre><code>docker exec lean_ci lake build Kata</code></pre>
+  <p>If it builds, Lean has accepted your first tactic proofs.</p>
+  <details>
+    <summary>What if I get an error?</summary>
+    <p>Make sure the theorems are at the end of the file, after the existing Lesson 3 theorems. The indentation after <code>by</code> should be two spaces — Lean is sensitive to indentation.</p>
+  </details>
+</div>
+
+<h2>4. Introducing <code>intro</code> — Handling Implication</h2>
+
+<p>Your mission includes proving logic tautologies like <code>P ∧ Q → Q ∧ P</code>. The <code>→</code> means "implies." To prove an implication, you <strong>assume the left side and try to prove the right side</strong>.</p>
+
+<p>The <code>intro</code> tactic does exactly that: it takes the premise of an implication and adds it to your context as a hypothesis.</p>
+
+<pre><code>theorem imp_refl (P : Prop) : P → P := by
+  intro h
+  exact h</code></pre>
+
+<p>Walk through what happens:</p>
+<ol>
+  <li>The goal is <code>P → P</code></li>
+  <li><code>intro h</code> changes the goal to <code>P</code> and adds <code>h : P</code> as a hypothesis (the assumption "P is true")</li>
+  <li><code>exact h</code> says "the goal is exactly the hypothesis h" — done!</li>
+</ol>
+
+<div class="concept">
+  <h3>💡 How <code>intro</code> Works</h3>
+  <p>Think of proving <code>P → Q</code> as a function: you receive a proof of <code>P</code> and must produce a proof of <code>Q</code>. That's exactly what <code>intro h</code> does — it says "assume <code>h : P</code>, now prove <code>Q</code>."</p>
+  <p>This is the Curry-Howard correspondence in action: implication <em>is</em> function type, and <code>intro</code> is lambda abstraction.</p>
+</div>
+
+<h2>5. Breaking Things Apart with <code>cases</code></h2>
+
+<p>The <code>cases</code> tactic breaks down a hypothesis that is a compound proposition. For <code>P ∧ Q</code>, it splits it into two separate hypotheses. For <code>P ∨ Q</code>, it creates two subgoals (one for each case).</p>
+
+<pre><code>theorem and_comm_imp (P Q : Prop) : P ∧ Q → Q ∧ P := by
+  intro h
+  rcases h with ⟨hp, hq⟩
+  exact And.intro hq hp</code></pre>
+
+<p>Walk through:</p>
+<ol>
+  <li><code>intro h</code> — assume <code>h : P ∧ Q</code></li>
+  <li><code>rcases h with ⟨hp, hq⟩</code> — break <code>h</code> into <code>hp : P</code> and <code>hq : Q</code></li>
+  <li><code>exact And.intro hq hp</code> — construct <code>Q ∧ P</code> using the swapped hypotheses</li>
+</ol>
+
+<p><code>rcases</code> is a more powerful version of <code>cases</code> — it pattern-matches the hypothesis and gives names to its components. The <code>⟨⟩</code> syntax constructs or destructs structures (like <code>And</code>).</p>
+
+<p><strong>Note:</strong> <code>And.intro hq hp</code> is the proof term for constructing an <code>And</code>. It takes two arguments: the proof of the left side and the proof of the right side.</p>
+
+<div class="exercise">
+  <h3>✏️ Exercise 4.2: Prove <code>and_comm_imp</code></h3>
+  <p>Add this theorem to <code>Kata/Basic.lean</code> (after the Lesson 4 section you started):</p>
+  <pre><code>theorem and_comm_imp (P Q : Prop) : P ∧ Q → Q ∧ P := by
+  intro h
+  rcases h with ⟨hp, hq⟩
+  exact And.intro hq hp</code></pre>
+  <p>Then run:</p>
+  <pre><code>docker exec lean_ci lake build Kata</code></pre>
+  <p>If it builds, Lean accepts your first logic proof!</p>
+  <details>
+    <summary>Try it with <code>constructor</code> instead</summary>
+    <p>An alternative way to prove the same theorem:</p>
+    <pre><code>theorem and_comm_imp' (P Q : Prop) : P ∧ Q → Q ∧ P := by
+  intro h
+  have hp : P := h.left
+  have hq : Q := h.right
+  constructor
+  · exact hq
+  · exact hp</code></pre>
+    <p><code>constructor</code> breaks a goal of the form <code>A ∧ B</code> into two subgoals: prove <code>A</code>, then prove <code>B</code>. The bullets (<code>·</code>) separate the subgoal proofs.</p>
+  </details>
+</div>
+
+<h2>6. Handling <code>Or</code> with <code>cases</code></h2>
+
+<p>Proving <code>P → P ∨ Q</code> is similar, but uses <code>Or.inl</code> (left case) and <code>Or.inr</code> (right case):</p>
+
+<pre><code>theorem or_intro_left (P Q : Prop) : P → P ∨ Q := by
+  intro hp
+  exact Or.inl hp</code></pre>
+
+<p><code>Or.inl hp</code> says "prove <code>P ∨ Q</code> by providing a proof of the left side (<code>P</code>)." <code>Or.inr</code> would prove it from the right side.</p>
+
+<div class="exercise">
+  <h3>✏️ Exercise 4.3: Prove <code>or_intro_right</code></h3>
+  <p>Add this theorem to <code>Kata/Basic.lean</code>:</p>
+  <pre><code>theorem or_intro_right (P Q : Prop) : Q → P ∨ Q := by
+  intro hq
+  exact Or.inr hq</code></pre>
+  <p>Build and check:</p>
+  <pre><code>docker exec lean_ci lake build Kata</code></pre>
+</div>
+
+<h2>7. Your First Tactic: <code>apply</code></h2>
+
+<p>The <code>apply</code> tactic matches the current goal against the <em>conclusion</em> of a known theorem or hypothesis, and if it matches, sets up the theorem's premises as new subgoals.</p>
+
+<p>For example, suppose you have <code>h : P → Q</code> and your goal is <code>Q</code>. Then <code>apply h</code> changes the goal to <code>P</code> — because if you can prove <code>P</code>, then <code>h</code> gives you <code>Q</code>.</p>
+
+<pre><code>theorem apply_example (P Q : Prop) (h : P → Q) (hp : P) : Q := by
+  apply h
+  exact hp</code></pre>
+
+<p>Walk through:</p>
+<ol>
+  <li>Goal is <code>Q</code>, we have <code>h : P → Q</code> and <code>hp : P</code></li>
+  <li><code>apply h</code> — changes goal to <code>P</code> (the premise of <code>h</code>)</li>
+  <li><code>exact hp</code> — closes the new goal</li>
+</ol>
+
+<div class="exercise">
+  <h3>✏️ Exercise 4.4: Prove a Chain of Implications</h3>
+  <p>Add this theorem to <code>Kata/Basic.lean</code>:</p>
+  <pre><code>theorem chain (P Q R : Prop) (h1 : P → Q) (h2 : Q → R) (hp : P) : R := by
+  apply h2
+  apply h1
+  exact hp</code></pre>
+  <p>Build and check:</p>
+  <pre><code>docker exec lean_ci lake build Kata</code></pre>
+  <details>
+    <summary>Read the proof aloud</summary>
+    <p>"I need to prove <code>R</code>. I know <code>h2 : Q → R</code>, so if I <code>apply h2</code>, I now need to prove <code>Q</code>. I know <code>h1 : P → Q</code>, so I <code>apply h1</code> and now I need to prove <code>P</code>. But I have <code>hp : P</code>, so <code>exact hp</code> closes it."</p>
+  </details>
+</div>
+
+<h2>8. Put It Together: More Logic Theorems</h2>
+
+<p>Now try proving these on your own. Add each one to <code>Kata/Basic.lean</code> and run <code>lake build</code> to check.</p>
+
+<div class="exercise">
+  <h3>✏️ Exercise 4.5: Prove Modus Ponens</h3>
+  <pre><code>theorem modus_ponens (P Q : Prop) (h : P → Q) (hp : P) : Q := by
+  -- your proof here (hint: apply)</code></pre>
+  <details>
+    <summary>Solution</summary>
+    <pre><code>theorem modus_ponens (P Q : Prop) (h : P → Q) (hp : P) : Q := by
+  apply h
+  exact hp</code></pre>
+  </details>
+</div>
+
+<div class="exercise">
+  <h3>✏️ Exercise 4.6: Prove <code>and_swap</code></h3>
+  <p>Prove that <code>P ∧ Q ∧ R → R ∧ Q ∧ P</code> (you'll need <code>rcases</code> with nested <code>⟨⟩</code>):</p>
+  <pre><code>theorem and_swap (P Q R : Prop) : P ∧ Q ∧ R → R ∧ Q ∧ P := by
+  intro h
+  rcases h with ⟨hp, hq, hr⟩
+  exact And.intro hr (And.intro hq hp)</code></pre>
+  <p>Note how <code>rcases</code> can flatten nested <code>∧</code> in one go!</p>
+  <p>Add this theorem and run <code>lake build</code>.</p>
+</div>
+
+<div class="exercise">
+  <h3>✏️ Exercise 4.7 (Challenge): Prove One of De Morgan's Laws</h3>
+  <p>This one is harder. Try to prove:</p>
+  <pre><code>theorem not_and_or_not (P Q : Prop) : ¬(P ∧ Q) → ¬P ∨ ¬Q := by
+  intro h
+  -- h : ¬(P ∧ Q), we need ¬P ∨ ¬Q
+  -- This requires classical logic (by_cases or em)
+  sorry</code></pre>
+  <p><strong>Hint:</strong> This theorem requires <strong>classical logic</strong> (the law of excluded middle). You can use <code>by_cases hp : P</code> to split into two cases: one where <code>P</code> is true, one where it's false.</p>
+  <details>
+    <summary>Solution (try yourself first!)</summary>
+    <pre><code>theorem not_and_or_not (P Q : Prop) : ¬(P ∧ Q) → ¬P ∨ ¬Q := by
+  intro h
+  by_cases hp : P
+  · -- if P is true, then Q must be false (otherwise P ∧ Q would hold)
+    by_cases hq : Q
+    · exfalso; exact h (And.intro hp hq)
+    · right; exact hq
+  · -- if P is false, we're done
+    left; exact hp</code></pre>
+    <p>New tactics used: <code>by_cases</code> (case split on a proposition), <code>exfalso</code> (change goal to <code>False</code>), <code>left</code>/<code>right</code> (pick side of an <code>Or</code>). Don't worry if this one is hard — it's a stretch exercise.</p>
+  </details>
+</div>
+
+<h2>Summary of Tactics Learned</h2>
+
+<table>
+  <tr><th>Tactic</th><th>Purpose</th><th>Example</th></tr>
+  <tr><td><code>simp</code></td><td>Simplify the goal using known rewrite rules</td><td><code>by simp</code></td></tr>
+  <tr><td><code>intro h</code></td><td>Assume the premise of an implication</td><td><code>intro h</code> — goal <code>P → Q</code> becomes <code>Q</code> with <code>h : P</code></td></tr>
+  <tr><td><code>exact h</code></td><td>The goal is exactly the hypothesis <code>h</code></td><td><code>exact hp</code></td></tr>
+  <tr><td><code>apply h</code></td><td>Match goal to conclusion of <code>h</code></td><td><code>apply h</code> — goal <code>Q</code> becomes <code>P</code> if <code>h : P → Q</code></td></tr>
+  <tr><td><code>rcases h with ⟨hp, hq⟩</code></td><td>Break a compound hypothesis into parts</td><td><code>rcases h with ⟨hp, hq⟩</code> splits <code>P ∧ Q</code></td></tr>
+  <tr><td><code>constructor</code></td><td>Break a <code>∧</code> goal into two subgoals</td><td><code>constructor</code> on goal <code>A ∧ B</code></td></tr>
+  <tr><td><code>left</code> / <code>right</code></td><td>Pick a side for <code>∨</code> goals</td><td><code>left</code> on goal <code>P ∨ Q</code> keeps <code>P</code></td></tr>
+  <tr><td><code>by_cases h : P</code></td><td>Case split on a proposition</td><td><code>by_cases h : P</code> creates two subgoals</td></tr>
+  <tr><td><code>exfalso</code></td><td>Change goal to <code>False</code> (for contradiction proofs)</td><td><code>exfalso</code></td></tr>
+</table>
+
+<h2>What You Learned</h2>
+<ul>
+  <li><code>rfl</code> only works for definitional equality — most theorems need tactic proofs</li>
+  <li>A <code>by</code> block enters tactic mode, where you guide the proof step by step</li>
+  <li><code>simp</code> simplifies goals using known identities</li>
+  <li><code>intro</code> handles <code>→</code> (implication) by assuming the premise</li>
+  <li><code>rcases</code> breaks compound hypotheses (<code>∧</code>, <code>∨</code>) into parts</li>
+  <li><code>apply</code> matches a goal to the conclusion of a theorem</li>
+  <li><code>exact</code> closes a goal when you have a proof that matches exactly</li>
+  <li>You proved your first logic theorems: <code>and_comm_imp</code>, <code>or_intro_left</code>, modus ponens</li>
+</ul>
+
+<h2>New Glossary Terms</h2>
+<ul>
+  <li><a href="../reference/glossary.html#by"><code>by</code> block</a> — enters tactic mode for writing step-by-step proofs</li>
+  <li><a href="../reference/glossary.html#intro"><code>intro</code></a> — assume the premise of an implication</li>
+  <li><a href="../reference/glossary.html#apply"><code>apply</code></a> — match a goal to a known theorem's conclusion</li>
+  <li><a href="../reference/glossary.html#rcases"><code>rcases</code></a> — destruct a compound hypothesis with pattern matching</li>
+  <li><a href="../reference/glossary.html#simp"><code>simp</code></a> — simplify the goal using rewrite rules</li>
+  <li><a href="../reference/glossary.html#constructor"><code>constructor</code></a> — break a <code>∧</code> goal into its two components</li>
+  <li><a href="../reference/glossary.html#exact"><code>exact</code></a> — close a goal when a hypothesis matches it exactly</li>
+</ul>
+
+<h2>Reference</h2>
+<ul>
+  <li><a href="../reference/glossary.html">Glossary of Lean Terms</a></li>
+  <li><a href="https://lean-lang.org/theorem_proving_in_lean4/">Theorem Proving in Lean 4</a> — Chapter 2 (Basics): <code>apply</code>, <code>intro</code>, <code>cases</code></li>
+  <li><a href="https://adam.math.hhu.de/#/g/hhu-adam/NNG4">Natural Number Game</a> — Worlds 1–3 (add_zero, zero_add, intro, apply, cases)</li>
+</ul>
+
+<h2>Follow-up Questions</h2>
+<p>Ask me anything. Some questions you might have:</p>
+<ul>
+  <li>"What's the difference between <code>rcases</code> and <code>cases</code>?"</li>
+  <li>"How do I prove things about <code>Nat</code> that need induction?"</li>
+  <li>"What does <code>exfalso</code> do exactly?"</li>
+  <li>"Can I use <code>simp</code> to prove <code>P ∧ Q → Q ∧ P</code>?"</li>
+  <li>"How do I know which tactic to use when?"</li>
+</ul>
+
+<hr>
+<p><em>Lesson 4 of the <a href="../MISSION.md">Lean for Undergraduate Mathematics and Functional Programming</a> mission.</em></p>
+
+</body>
+</html>

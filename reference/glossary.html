@@ -181,10 +181,58 @@
   The small, trusted core of Lean that checks proofs. Everything else — tactics, automation, the elaborator — can have bugs, but the kernel is minimal and verified. It's the final authority on correctness.
 </dd>
 
+<dt id="by"><code>by</code> block <span class="term-meta">(syntax)</span></dt>
+<dd>
+  Enters <strong>tactic mode</strong>, where you write step-by-step proof commands instead of giving a proof term directly. The tactics after <code>by</code> transform the goal until it is proved. Example:
+  <pre><code>theorem add_zero (n : Nat) : n + 0 = n := by
+  simp</code></pre>
+  <div class="see-also">See also: <a href="../lessons/0004-beyond-rfl-your-first-tactic-proofs.html">Lesson 4: Beyond rfl</a></div>
+</dd>
+
+<dt id="simp"><code>simp</code> <span class="term-meta">(tactic)</span></dt>
+<dd>
+  Simplifies the goal (and hypotheses) using a database of known rewrite rules. Good for algebraic identities like <code>n + 0 = n</code> and <code>0 + n = n</code>. Example: <code>by simp</code>.
+  <div class="see-also">See also: <a href="../lessons/0004-beyond-rfl-your-first-tactic-proofs.html">Lesson 4: Beyond rfl</a></div>
+</dd>
+
+<dt id="intro"><code>intro</code> <span class="term-meta">(tactic)</span></dt>
+<dd>
+  Used when the goal is an implication <code>P → Q</code>. It assumes the premise <code>P</code>, giving it a name, and sets the new goal to <code>Q</code>. Example:
+  <pre><code>theorem imp_refl (P : Prop) : P → P := by
+  intro h
+  exact h</code></pre>
+  <div class="see-also">See also: <a href="../lessons/0004-beyond-rfl-your-first-tactic-proofs.html">Lesson 4: Beyond rfl</a></div>
+</dd>
+
+<dt id="exact"><code>exact</code> <span class="term-meta">(tactic)</span></dt>
+<dd>
+  Closes the current goal when you have a hypothesis or term that matches the goal exactly. Example: if the goal is <code>P</code> and <code>hp : P</code>, then <code>exact hp</code> finishes the proof.
+  <div class="see-also">See also: <a href="../lessons/0004-beyond-rfl-your-first-tactic-proofs.html">Lesson 4: Beyond rfl</a></div>
+</dd>
+
+<dt id="apply"><code>apply</code> <span class="term-meta">(tactic)</span></dt>
+<dd>
+  Matches the current goal against the <strong>conclusion</strong> of a hypothesis or theorem, turning the goal into the hypothesis's premise(s). Example: if the goal is <code>Q</code> and <code>h : P → Q</code>, then <code>apply h</code> changes the goal to <code>P</code>.
+  <div class="see-also">See also: <a href="../lessons/0004-beyond-rfl-your-first-tactic-proofs.html">Lesson 4: Beyond rfl</a></div>
+</dd>
+
+<dt id="rcases"><code>rcases</code> <span class="term-meta">(tactic)</span></dt>
+<dd>
+  Destructs a compound hypothesis using pattern matching. Breaks <code>P ∧ Q</code> into separate hypotheses, flattens nested structures, and handles <code>Or</code> with case splits. Example:
+  <pre><code>rcases h with ⟨hp, hq⟩  -- splits P ∧ Q into hp : P, hq : Q</code></pre>
+  <div class="see-also">See also: <a href="../lessons/0004-beyond-rfl-your-first-tactic-proofs.html">Lesson 4: Beyond rfl</a></div>
+</dd>
+
+<dt id="constructor"><code>constructor</code> <span class="term-meta">(tactic)</span></dt>
+<dd>
+  Breaks a goal of the form <code>A ∧ B</code> into two subgoals: prove <code>A</code>, then prove <code>B</code>. Each subgoal is proved separately, often separated by bullets (<code>·</code>).
+  <div class="see-also">See also: <a href="../lessons/0004-beyond-rfl-your-first-tactic-proofs.html">Lesson 4: Beyond rfl</a></div>
+</dd>
+
 </dl>
 
 <hr>
-<p><em>Last updated: June 2026 (Lesson 3: theorem, rfl, ∀, definitional equality). Part of the <a href="../MISSION.md">Lean for Spec-Driven AI Development</a> mission.</em></p>
+<p><em>Last updated: July 2026 (Lesson 4: by, intro, apply, rcases, simp, constructor, exact). Part of the <a href="../MISSION.md">Lean for Undergraduate Mathematics and Functional Programming</a> mission.</em></p>
 
 </body>
 </html>

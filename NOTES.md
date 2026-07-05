@@ -4,20 +4,21 @@
 - Background: Python, R, MATLAB — OOP experience, no FP
 - No prior exposure to: type theory, formal logic, Curry-Howard, proof assistants
 - Complete beginner to Lean
-- Mission: Use Lean as specification language for LLM-driven development
-- Target domains: Web APIs, data analysis software
+- Mission: Prove undergraduate abstract mathematics theorems (set theory, logic → real analysis, topology, abstract algebra) and solve FP katas, interleaved
+- Learning approach: interleave FP katas (programming fluency) with theorem proving (formal reasoning)
 
 ## Preferences (expressed)
 - Using Docker-based dev environment (`docker exec lean_ci`)
 - Prefers hands-on katas over abstract theory
 - Needs concepts built from first principles — cannot assume type theory/FP/logic knowledge
+- Learning by doing: each new concept introduced through an exercise
 
 ## Teaching Approach
 - Drip-feed concepts: one new idea per lesson maximum
-- Always connect every lesson back to the mission (spec-driven development with LLMs)
+- Always connect every lesson back to the mission (undergraduate math + FP katas)
 - Use Python analogies where helpful, but flag differences explicitly
 - Never assume prior knowledge of functional programming, types, or logic
-- Use the existing kata framework (LSpec tests) for exercises
+- Use the existing kata framework (LSpec tests) for exercises, plus `lake build` for theorem verification
 
 ## Workspace Structure
 - Lessons: `./lessons/0001-*.html` (sequential)
