@@ -12,6 +12,8 @@
   Comprehensive reference for all Lean syntax and semantics. **Use for**: looking up specific language features.
 - [Interactive: Natural Number Game (NNG4)](https://adam.math.hhu.de/#/g/hhu-adam/NNG4)
   Gamified Lean tutorial teaching theorem proving through natural numbers. **Use for**: building intuition for proofs in a fun, low-stakes environment.
+- [Mathematics in Lean (MIL)](https://leanprover-community.github.io/mathematics_in_lean/)
+  Main resource for mathematicians who want to learn mathematical formalization through interactive, tactic-based theorem proving using Lean's Mathlib library.
 
 ### Secondary
 
