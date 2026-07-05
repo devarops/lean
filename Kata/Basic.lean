@@ -47,3 +47,7 @@ theorem hello_greets (name : String) : hello name = s!"Hello, {name}!" :=
   rfl
 
 #check hello_greets
+
+
+-- === Lesson 4: Tactic Proofs ===
+-- (Add your theorems here)
