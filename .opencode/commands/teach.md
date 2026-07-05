@@ -57,6 +57,26 @@ Each lesson should recommend a primary source for the user to read or watch. Thi
 
 Each lesson should contain a reminder to ask followup questions to the agent. The agent is their teacher, and can assist with anything that's unclear.
 
+## Tests
+
+Every lesson must include **failing tests** that prove the exercises have not
+yet been solved. Adding these tests turns the lesson creation into the **Red
+phase** of TDD:
+
+1. Agent creates the lesson (knowledge + exercise instructions).
+2. Agent adds failing tests to `tests/test.lean` — one test group per exercise,
+   or a set of groups covering the exercises.
+3. Agent runs `make tests` to confirm failure (Red).
+4. User solves the exercises.
+5. Agent runs `make tests` to confirm all pass (Green).
+
+The tests must verify the exercises are solved correctly **without giving away
+the solution**. The user must exert genuine effort to solve each exercise —
+that effort is what builds long-term retention.
+
+See [TEST-PATTERN.md](./TEST-PATTERN.md) for detailed guidelines on writing
+exercise tests in this workspace.
+
 ## Assets
 
 Lessons are built from reusable **components**, stored in `./assets/`: stylesheets, quiz widgets, simulators, diagram helpers — anything a second lesson could reuse.
